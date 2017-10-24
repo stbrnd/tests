@@ -39,9 +39,6 @@
         screenHeight  = screen.height,
         body          = document.body,
         overlay       = document.getElementById('overlay'),
-        getValue      = function ( min, max ) {
-            return ~~(Math.random() * (max - min + 1)) + min;
-        },
         colors        = ['#f00', '#0f0', '#00f'],
         stopped       = false,
         counter       = 0,
@@ -50,10 +47,22 @@
 
 
     function generate () {
-        var div      = document.createElement('div'),
-            getColor = function () {
-                return '#' + ((1<<24)*Math.random()|0).toString(16);
-            };
+        var div = document.createElement('div');
+
+        /**
+         *
+         * @param min
+         * @param max
+         * @returns {*}
+         */
+        function getValue ( min, max ) {
+            return ~~(Math.random() * (max - min + 1)) + min;
+        }
+
+
+        getColor = function () {
+            return '#' + ((1<<24)*Math.random()|0).toString(16);
+        };
 
         div.heavyProp = {_: Array(100).join('fghgfhhgfhfgdsg')};
 
