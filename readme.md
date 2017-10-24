@@ -3,17 +3,23 @@ Test pages
 
 ### Checking iframe security
 
-[link](http://stbrnd.github.io/tests/iframe.security.check.html) Test page for checking iframe security police.
+Test page for checking iframe security police.
+
+[http://stbrnd.github.io/tests/iframe.security.check.html](http://stbrnd.github.io/tests/iframe.security.check.html)
 
 
 ### Detect issues in rendering
 
-[link](http://stbrnd.github.io/tests/render.random.blocks.html) Test page for checking correctness of rendering of multiple elements.
+Test page for checking correctness of rendering of multiple elements.
+
+[http://stbrnd.github.io/tests/render.random.blocks.html](http://stbrnd.github.io/tests/render.random.blocks.html)
 
 
 ### Repaint testing
 
-[link](http://stbrnd.github.io/tests/repaint.on.focus.html) Test page for checking repaints on block focus without any change of geometry or content.
+Test page for checking repaints on block focus without any change of geometry or content.
+
+[http://stbrnd.github.io/tests/repaint.on.focus.html](http://stbrnd.github.io/tests/repaint.on.focus.html)
 
 
 ### Weinre information page
