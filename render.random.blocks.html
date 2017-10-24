@@ -49,22 +49,29 @@
     function generate () {
         var div = document.createElement('div');
 
+
         /**
+         * Return random value between given two (inclusive).
          *
-         * @param min
-         * @param max
-         * @returns {*}
+         * @param {number} min minimal allowed value
+         * @param {number} max maximum allowed value
+         *
+         * @return {number}
          */
         function getValue ( min, max ) {
             return ~~(Math.random() * (max - min + 1)) + min;
         }
 
 
-        getColor = function () {
+        /**
+         * Generate random color in RGB format.
+         *
+         * @return {string} generated HEX color code
+         */
+        function getColor () {
             return '#' + ((1<<24)*Math.random()|0).toString(16);
-        };
+        }
 
-        div.heavyProp = {_: Array(100).join('fghgfhhgfhfgdsg')};
 
         div.style.width = getValue(30, 70) + 'px';
         div.style.height = getValue(20, 50) + 'px';
@@ -72,14 +79,14 @@
         div.style.left = getValue(0, screenWidth) + 'px';
         div.style.backgroundColor = getColor();
         div.style.borderColor = getColor();
-        div.style.borderWidth = getValue(5, 15) + 'px';
-        div.style.borderStyle = 'solid';
-        div.style.borderRadius = getValue(5, 30) + 'px';
+        div.style.borderWidth = getValue(1, 15) + 'px';
+        div.style.borderRadius = getValue(0, 30) + 'px';
         div.style.zIndex = getValue(1, 100);
         div.style.opacity = 1 / getValue(1, 50);
 
         body.appendChild(div);
     }
+
 
     timerId = setInterval(function () {
         if ( counter < MAX_DIV_COUNT && !stopped ) {
