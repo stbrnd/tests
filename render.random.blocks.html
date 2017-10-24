@@ -32,20 +32,23 @@
 <body>
 <div id="overlay"></div>
 <script>
-    var MAX_DIV_COUNT = 10000,
-        NEW_DIV_DELAY = 30,
-        OVERLAY_DELAY = 500,
-        screenWidth   = screen.width,
-        screenHeight  = screen.height,
-        body          = document.body,
-        overlay       = document.getElementById('overlay'),
-        colors        = ['#f00', '#0f0', '#00f'],
-        stopped       = false,
-        counter       = 0,
-        index         = 0,
-        timerId;
+    var MAX_BLOCK_COUNT = 10000,
+        STEP_DELAY      = 5,
+        newBlockDelay   = 30,
+        overlayDelay    = 500,
+        screenWidth     = screen.width,
+        screenHeight    = screen.height,
+        body            = document.body,
+        overlay         = document.getElementById('overlay'),
+        colors          = ['#f00', '#0f0', '#00f'],
+        stopped         = false,
+        counter         = 0,
+        index           = 0,
+        timerIdBlocks,
+        timerIdOverlay;
 
 
+    /** Generate blocks with random parameters. */
     function generate () {
         var div = document.createElement('div');
 
@@ -69,7 +72,7 @@
          * @return {string} generated HEX color code
          */
         function getColor () {
-            return '#' + ((1<<24)*Math.random()|0).toString(16);
+            return '#' + ((1 << 24) * Math.random() | 0).toString(16);
         }
 
 
@@ -88,27 +91,80 @@
     }
 
 
-    timerId = setInterval(function () {
-        if ( counter < MAX_DIV_COUNT && !stopped ) {
-            counter += 1;
-            generate();
-        } else if ( counter === MAX_DIV_COUNT ) {
-            counter = 0;
-            clearInterval(timerId);
-        }
-    }, NEW_DIV_DELAY);
+    /**
+     * Generate new block.
+     *
+     * @param {number} stepDelay delay between appearing new block
+     */
+    function blinkBlocks ( stepDelay ) {
+        newBlockDelay += stepDelay;
+        newBlockDelay = newBlockDelay < 0 ? 0 : newBlockDelay;
 
-    setInterval(function () {
-        if ( !stopped ) {
-            overlay.style.backgroundColor = colors[index];
-            overlay.style.visibility = ['hidden', 'visible'][+(overlay.style.visibility === 'hidden')];
-            index = index < 2 ? index + 1 : 0;
-        }
-    }, OVERLAY_DELAY);
+        clearInterval(timerIdBlocks);
+
+        timerIdBlocks = setInterval(function () {
+            if ( counter < MAX_BLOCK_COUNT && !stopped ) {
+                counter += 1;
+                generate();
+            } else if ( counter === MAX_BLOCK_COUNT ) {
+                counter = 0;
+                clearInterval(timerIdBlocks);
+            }
+        }, newBlockDelay);
+    }
+
+
+    /**
+     * Animate overlay.
+     *
+     * @param {number} stepDelay delay between appearing overlay
+     */
+    function blinkOverlay ( stepDelay ) {
+        overlayDelay += stepDelay;
+        overlayDelay = overlayDelay < 0 ? 0 : overlayDelay;
+
+        clearInterval(timerIdOverlay);
+
+        timerIdOverlay = setInterval(function () {
+            if ( !stopped ) {
+                overlay.style.backgroundColor = colors[index];
+                overlay.style.visibility = ['hidden', 'visible'][+(overlay.style.visibility === 'hidden')];
+                index = index < 2 ? index + 1 : 0;
+            }
+        }, overlayDelay);
+    }
+
+    console.log('\nPress "1" for slow down blocks generation.\nPress "2" for speed up blocks generation.\n' +
+                'Press "3" for slow down appearing overlay.\nPress "4" for speed up appearing overlay.\n' +
+                'Press "i" for display statistic.\n');
+
+    blinkBlocks(0);
+    blinkOverlay(0);
 
     document.addEventListener('keydown', function ( event ) {
-        if ( event.keyCode === 32 ) { // toggle blinking on Space bar
-            stopped = !stopped;
+        switch ( event.keyCode ) {
+            case 32: // toggle blinking on Space bar
+                stopped = !stopped;
+                break;
+            case 49:
+                blinkBlocks(-STEP_DELAY);
+                console.log('blocks generating delay: ' + newBlockDelay);
+                break;
+            case 50:
+                blinkBlocks(STEP_DELAY);
+                console.log('blocks generating delay: ' + newBlockDelay);
+                break;
+            case 51:
+                blinkOverlay(-STEP_DELAY);
+                console.log('overlay appearing delay: ' + overlayDelay);
+                break;
+            case 52:
+                blinkOverlay(STEP_DELAY);
+                console.log('overlay appearing delay: ' + overlayDelay);
+                break;
+            case 73: // get info on "i" button
+                console.log('\ngenerated blocks: ' + counter + '\nblocks generating delay: ' + newBlockDelay + '\noverlay appearing delay: ' + overlayDelay);
+                break;
         }
     });
 </script>
