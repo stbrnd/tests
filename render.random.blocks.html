@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>multiple random blocks</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+            width: 100%;
+        }
+
+        body {
+            background: #9a9a9a;
+        }
+
+        div:not([id=overlay]) {
+            border-style: solid;
+            position: absolute;
+        }
+
+        #overlay {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<div id="overlay"></div>
+<script>
+    var MAX_DIV_COUNT = 10000,
+        NEW_DIV_DELAY = 30,
+        OVERLAY_DELAY = 500,
+        screenWidth   = screen.width,
+        screenHeight  = screen.height,
+        body          = document.body,
+        overlay       = document.getElementById('overlay'),
+        getValue      = function ( min, max ) {
+            return ~~(Math.random() * (max - min + 1)) + min;
+        },
+        colors        = ['#f00', '#0f0', '#00f'],
+        stopped       = false,
+        counter       = 0,
+        index         = 0,
+        timerId;
+
+
+    function generate () {
+        var div      = document.createElement('div'),
+            getColor = function () {
+                return '#' + ((1<<24)*Math.random()|0).toString(16);
+            };
+
+        div.heavyProp = {_: Array(100).join('fghgfhhgfhfgdsg')};
+
+        div.style.width = getValue(30, 70) + 'px';
+        div.style.height = getValue(20, 50) + 'px';
+        div.style.top = getValue(0, screenHeight) + 'px';
+        div.style.left = getValue(0, screenWidth) + 'px';
+        div.style.backgroundColor = getColor();
+        div.style.borderColor = getColor();
+        div.style.borderWidth = getValue(5, 15) + 'px';
+        div.style.borderStyle = 'solid';
+        div.style.borderRadius = getValue(5, 30) + 'px';
+        div.style.zIndex = getValue(1, 100);
+        div.style.opacity = 1 / getValue(1, 50);
+
+        body.appendChild(div);
+    }
+
+    timerId = setInterval(function () {
+        if ( counter < MAX_DIV_COUNT && !stopped ) {
+            counter += 1;
+            generate();
+        } else if ( counter === MAX_DIV_COUNT ) {
+            counter = 0;
+            clearInterval(timerId);
+        }
+    }, NEW_DIV_DELAY);
+
+    setInterval(function () {
+        if ( !stopped ) {
+            overlay.style.backgroundColor = colors[index];
+            overlay.style.visibility = ['hidden', 'visible'][+(overlay.style.visibility === 'hidden')];
+            index = index < 2 ? index + 1 : 0;
+        }
+    }, OVERLAY_DELAY);
+
+    document.addEventListener('keydown', function ( event ) {
+        if ( event.keyCode === 32 ) { // toggle blinking on Space bar
+            stopped = !stopped;
+        }
+    });
+</script>
+</body>
+</html>
