@@ -27,6 +27,9 @@ Test page for checking fonts. Get parameters "font" and "size" to change font-fa
 
 [http://stbrnd.github.io/tests/font.html](http://stbrnd.github.io/tests/font.html)
 
+Example:
+`http://stbrnd.github.io/tests/font.html?font=Arial&size=50`
+
 ### Weinre information page
 
 Test page for append weinre script on target and display information about for STB.
