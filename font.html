@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Font test</title>
+    <script>
+        window.onload = function () {
+            var tmp, param, items,
+                i;
+
+            param = {};
+            items = location.search.substr(1).split("&");
+            for ( i = 0; i < items.length; i++ ) {
+                tmp = items[i].split("=");
+                if ( tmp.length === 2 ) {
+                    param[tmp[0]] = decodeURIComponent(tmp[1]);
+                }
+            }
+
+            if ( param.font ) {
+                document.body.style.fontFamily = param.font;
+            }
+
+            if ( param.size ) {
+                document.body.style.fontSize = param.size + 'px';
+            }
+        }
+    </script>
+    <style>
+
+        body {
+            width: 100%;
+            height: 100%;
+            background: white;
+            color: black;
+            font-size: 22px;
+        }
+
+        div {
+            padding-bottom: 5%;
+        }
+
+
+    </style>
+</head>
+<body>
+<div>
+    <div>QWERTYUIOPASDFGHJKLZXCVBNM 1234567890 qwertyuiopasdfghjklzxcvbnm ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ йцукенгшщзхъфывапролджэячсмитьбю</div>
+    <div><b>QWERTYUIOPASDFGHJKLZXCVBNM 1234567890 qwertyuiopasdfghjklzxcvbnm ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ йцукенгшщзхъфывапролджэячсмитьбю</b></div>
+    <div><i>QWERTYUIOPASDFGHJKLZXCVBNM 1234567890 qwertyuiopasdfghjklzxcvbnm ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ йцукенгшщзхъфывапролджэячсмитьбю</i></div>
+</div>
+</body>
+</html>

@@ -21,6 +21,14 @@ Test page for checking repaints on block focus without any change of geometry or
 
 [http://stbrnd.github.io/tests/repaint.on.focus.html](http://stbrnd.github.io/tests/repaint.on.focus.html)
 
+### Font testing
+
+Test page for checking fonts. Get parameters "font" and "size" to change font-family and font-size.
+
+[http://stbrnd.github.io/tests/font.html](http://stbrnd.github.io/tests/font.html)
+
+Example:
+`http://stbrnd.github.io/tests/font.html?font=Arial&size=50`
 
 ### Weinre information page
 
