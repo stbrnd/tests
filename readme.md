@@ -1,34 +1,15 @@
 Test pages
 ==========
 
-[Test page for checking iframe security police](iframe.security.check/index.html)
+[Test page for checking iframe security police](iframe.security.check)
 
+[Test page for checking correctness of rendering of multiple elements](render.random.blocks)
 
-[Test page for checking correctness of rendering of multiple elements](render.random.blocks/index.html)
+[Test page for checking repaints on block focus without any change of geometry or content](repaint.on.focus)
 
+[Test page for checking fonts. Get parameters "font" and "size" to change font-family and font-size](font)
 
-### Repaint testing
-
-Test page for checking repaints on block focus without any change of geometry or content.
-
-[http://stbrnd.github.io/tests/repaint.on.focus.html](http://stbrnd.github.io/tests/repaint.on.focus.html)
-
-### Font testing
-
-Test page for checking fonts. Get parameters "font" and "size" to change font-family and font-size.
-
-[http://stbrnd.github.io/tests/font.html](http://stbrnd.github.io/tests/font.html)
-
-Example:
-`http://stbrnd.github.io/tests/font.html?font=Arial,Ubuntu&size=50`
-
-### Weinre information page
-
-Test page for append weinre script on target and display information about for STB.
-
-Example:
-`http://stbrnd.github.io/tests/weinre.info.page.html?url=http://192.168.1.13:8000#anonymous`
-
+[Test page for append weinre script on target and display information about for STB](weinre.info.page)
 
 ## Contribution
 

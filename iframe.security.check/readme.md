@@ -1,5 +1,5 @@
 Test page for checking iframe security
-==========
+======================================
 
 Test page for checking iframe security police.
 

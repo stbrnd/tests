@@ -1,5 +1,5 @@
 Test page for repaint testing
-==========
+=============================
 
 Test page for checking repaints on block focus without any change of geometry or content.
 

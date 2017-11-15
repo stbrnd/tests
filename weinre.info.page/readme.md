@@ -1,5 +1,5 @@
 Weinre information page
-==========
+=======================
 
 Test page for append weinre script on target and display information about for STB.
 
