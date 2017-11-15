@@ -2,7 +2,8 @@
 
 window.onload = function () {
     var tmp, param, items,
-        i;
+        i,
+        set = 'You set';
 
     param = {};
     items = location.search.substr(1).split('&');
@@ -15,11 +16,14 @@ window.onload = function () {
 
     if ( param.font ) {
         document.body.style.fontFamily = param.font;
+        set += ' font-family ' + param.font;
     }
 
     if ( param.size ) {
         document.body.style.fontSize = param.size + 'px';
+        set += (param.font ? ' and' : '') + ' font-size ' + param.size;
     }
 
-    console.log('Now font-family set: ' + getComputedStyle(document.body)['font-family']);
+    console.log(set);
+    console.log('Now use font-family ' + getComputedStyle(document.body)['font-family'] + ' and font-size ' + getComputedStyle(document.body)['font-size']);
 };

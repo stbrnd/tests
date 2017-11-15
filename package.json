@@ -4,6 +4,6 @@
     },
     "dependencies": {
         "eslint": "*",
-        "cjs-eslint-config": "*"
+        "spa-eslint-config": "*"
     }
 }
