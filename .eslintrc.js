@@ -7,14 +7,9 @@
 // public
 module.exports = {
     // base rules
-    extends: require.resolve('cjs-eslint-config/.eslintrc.js'),
+    extends: require.resolve('spa-eslint-config/.eslintrc.js'),
 
     globals : {
-        gSTB: true,
-        window: true,
-        document: true,
-        getComputedStyle: true,
-        location: true,
-        screen: true
+        gSTB: true
     }
 };
