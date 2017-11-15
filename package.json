@@ -3,7 +3,7 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "eslint": "3.*.*",
+        "eslint": "*",
         "cjs-eslint-config": "*"
     }
 }
