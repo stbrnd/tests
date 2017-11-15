@@ -2,13 +2,13 @@
 
 window.onload = function () {
     var tmp, param, items,
-        i,
-        set = '';
+        index,
+        body = getComputedStyle(document.body),
+        param = {};
 
-    param = {};
     items = location.search.substr(1).split('&');
-    for ( i = 0; i < items.length; i++ ) {
-        tmp = items[i].split('=');
+    for ( index = 0; index < items.length; index++ ) {
+        tmp = items[index].split('=');
         if ( tmp.length === 2 ) {
             param[tmp[0]] = decodeURIComponent(tmp[1]);
         }
@@ -16,14 +16,12 @@ window.onload = function () {
 
     if ( param.font ) {
         document.body.style.fontFamily = param.font;
-        set += 'font set: ' + param.font;
     }
 
     if ( param.size ) {
         document.body.style.fontSize = param.size + 'px';
-        set += param.font ? ' (' + param.size + 'px)' : 'font-size set: ' + param.size + 'px';
     }
 
-    console.log(set);
-    console.log('font use: ' + getComputedStyle(document.body)['font-family'] + ' (' + getComputedStyle(document.body)['font-size'] + ')');
+    console.log('font set: ' + param.font + ' (' + param.size + 'px)');
+    console.log('font use: ' + body['font-family'] + ' (' + body['font-size'] + ')');
 };
