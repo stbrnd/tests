@@ -3,7 +3,7 @@
 window.onload = function () {
     var tmp, param, items,
         i,
-        set = 'You set';
+        set = '';
 
     param = {};
     items = location.search.substr(1).split('&');
@@ -16,14 +16,14 @@ window.onload = function () {
 
     if ( param.font ) {
         document.body.style.fontFamily = param.font;
-        set += ' font-family ' + param.font;
+        set += 'font set: ' + param.font;
     }
 
     if ( param.size ) {
         document.body.style.fontSize = param.size + 'px';
-        set += (param.font ? ' and' : '') + ' font-size ' + param.size;
+        set += param.font ? ' (' + param.size + 'px)' : 'font-size set: ' + param.size + 'px';
     }
 
     console.log(set);
-    console.log('Now use font-family ' + getComputedStyle(document.body)['font-family'] + ' and font-size ' + getComputedStyle(document.body)['font-size']);
+    console.log('font use: ' + getComputedStyle(document.body)['font-family'] + ' (' + getComputedStyle(document.body)['font-size'] + ')');
 };
