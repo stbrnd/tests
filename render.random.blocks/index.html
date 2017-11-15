@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>multiple random blocks</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+            width: 100%;
+        }
+
+        body {
+            background: #9a9a9a;
+        }
+
+        div:not([id=overlay]) {
+            border-style: solid;
+            position: absolute;
+        }
+
+        #overlay {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<div id="overlay"></div>
+<script src="main.js"></script>
+</body>
+</html>
