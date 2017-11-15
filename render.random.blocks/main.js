@@ -131,7 +131,8 @@ document.addEventListener('keydown', function ( event ) {
             console.log('overlay appearing delay: ' + overlayDelay);
             break;
         case 73: // get info on "i" button
-            console.log('\ngenerated blocks: ' + counter + '\nblocks generating delay: ' + newBlockDelay + '\noverlay appearing delay: ' + overlayDelay);
+            console.log('\ngenerated blocks: ' + counter + '\nblocks generating delay: ' + newBlockDelay +
+                '\noverlay appearing delay: ' + overlayDelay);
             break;
     }
 });

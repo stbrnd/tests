@@ -3,12 +3,11 @@
 var temp = {},
     queryParams = location.search,
     query = queryParams.substr(1, queryParams.length).split('&').map(function ( item ) {
-            item = item.split('=');
-            temp[item[0]] = item[1];
+        item = item.split('=');
+        temp[item[0]] = item[1];
 
-            return temp;
-        }
-    ),
+        return temp;
+    }),
     scriptPath = '/target/target-script-min.js',
     $script;
 
@@ -22,7 +21,7 @@ if ( query.url && query.url.search('/') >= 0 ) {
 }
 
 if ( window.gSTB ) {
-    (function(){
+    (function () {
         window.stbIP.innerText = gSTB.RDir('IPAddress');
         window.stbModel.innerText = gSTB.GetDeviceModel();
         window.stbMac.innerText = gSTB.GetDeviceMacAddress();
@@ -32,9 +31,9 @@ if ( window.gSTB ) {
     //polyfill for rts target functions
     window.done = function ( status ) {
         console.log('Task done with status: ' + !!status);
-    }
+    };
 
     window.output = function ( text ) {
         console.log(text);
-    }
+    };
 }
