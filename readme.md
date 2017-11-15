@@ -1,18 +1,10 @@
 Test pages
 ==========
 
-### Checking iframe security
-
-Test page for checking iframe security police.
-
-[http://stbrnd.github.io/tests/iframe.security.check.html](http://stbrnd.github.io/tests/iframe.security.check.html)
+[Test page for checking iframe security police](iframe.security.check/index.html)
 
 
-### Detect issues in rendering
-
-Test page for checking correctness of rendering of multiple elements.
-
-[http://stbrnd.github.io/tests/render.random.blocks.html](http://stbrnd.github.io/tests/render.random.blocks.html)
+[Test page for checking correctness of rendering of multiple elements](render.random.blocks/index.html)
 
 
 ### Repaint testing
@@ -28,7 +20,7 @@ Test page for checking fonts. Get parameters "font" and "size" to change font-fa
 [http://stbrnd.github.io/tests/font.html](http://stbrnd.github.io/tests/font.html)
 
 Example:
-`http://stbrnd.github.io/tests/font.html?font=Arial&size=50`
+`http://stbrnd.github.io/tests/font.html?font=Arial,Ubuntu&size=50`
 
 ### Weinre information page
 
