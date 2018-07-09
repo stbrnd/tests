@@ -1,15 +1,18 @@
 Test pages
 ==========
 
-[Test page for checking iframe security police](iframe.security.check)
+[Checking HTML5 History API](html5.historyapi.check)
 
-[Test page for checking correctness of rendering of multiple elements](render.random.blocks)
+[Checking iframe security policy](iframe.security.check)
 
-[Test page for checking repaints on block focus without any change of geometry or content](repaint.on.focus)
+[Detect issues in rendering](render.random.blocks)
 
-[Test page for checking fonts. Get parameters "font" and "size" to change font-family and font-size](font)
+[Testing of repaint](repaint.on.focus)
 
-[Test page for append weinre script on target and display information about for STB](weinre.info.page)
+[Checking fonts. Get parameters "font" and "size" to change font-family and font-size](font)
+
+[Append weinre script on the target and display information about for STB](weinre.info.page)
+
 
 ## Contribution
 
