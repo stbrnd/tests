@@ -24,6 +24,7 @@ var errors = { // feel free to add other error types
  */
 function callMethod ( method ) {
     try {
+        // `go()` without arguments reloads page
         return method === historyAPI.go ? undefined : method.call(historyAPI);
     } catch ( error ) {
         return '[' + error.name + ']: ' + error.message;
@@ -31,7 +32,9 @@ function callMethod ( method ) {
 }
 
 
-if ( Object.prototype.toString.call(historyAPI).slice(8, -1) === 'Object' ) {
+// note that `Object.prototype.toString.call(historyAPI).slice(8, -1)` returns 'History', not 'Object', which possibly may vary
+// so use primitive checking
+if ( historyAPI && typeof historyAPI === 'object' ) {
     doc.body.classList.add('success');
 
     for ( prop in historyAPI ) {
