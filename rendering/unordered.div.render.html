@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Repaint before hide</title>
+    <style>
+        html, body {
+            color: #000;
+            background: #fff;
+        }
+
+        #popup {
+            /* position: relative; */
+            width: 500px;
+            height: 500px;
+            background: #555;
+        }
+
+        .item {
+            width: 250px;
+            height: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: none;" id="popup">
+    </div>
+    <script>
+        var popup = document.getElementById('popup'),
+            hidden = true;
+
+        window.addEventListener('keydown', function ( event ) {
+            console.log('keydown');
+            if ( event.keyCode === 0 ) {
+                // filter noise keydown event
+                return;
+            }
+
+            if ( hidden ) {
+                popup.style.display = '';
+                hidden = false;
+            } else {
+                popup.style.display = 'none';
+                hidden = true;
+            }
+
+            popup.innerHTML = '<div class="item"></div>';
+        });
+    </script>
+</body>
+</html>
