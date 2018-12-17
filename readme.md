@@ -13,6 +13,8 @@ Test pages
 
 [Append weinre script on the target and display information about for STB](weinre.info.page)
 
+[Checking hiding of Wild Web window on mouse click in other window](wildweb.hide.onclick)
+
 
 ## Contribution
 
