@@ -1,15 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Web Face window</title>
+    <head>
+        <meta charset="UTF-8">
+        <title>Web Face window</title>
 
-    <style>
-        body {
-            background: #9f3b71;
-        }
-    </style>
-</head>
-<body>
-</body>
+        <style>
+            body {
+                width: 100%;
+                height: 100%;
+                background: #9f3b71;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            window.moveTo(100, 0);
+            window.resizeTo(screen.width - 300, screen.height - 400);
+
+            stbWindowMgr.initWebWindow('https://www.google.com');
+
+            // DEBUG
+            console.log('\ninit web window --->');
+            console.log(stbWindowMgr.windowList());
+
+            // web window geometry
+            stbWindowMgr.resizeWebWindow(20, 20, 400, 500);
+            stbWindowMgr.raiseWebWindow();
+
+            // DEBUG
+            console.log('\nend --->');
+            console.log(stbWindowMgr.windowList());
+        </script>
+    </body>
 </html>
