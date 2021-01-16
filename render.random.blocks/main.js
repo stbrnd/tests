@@ -3,7 +3,7 @@
 var MAX_BLOCK_COUNT = 10000,
     STEP_DELAY      = 5,
     newBlockDelay   = 30,
-    overlayDelay    = 500,
+    overlayDelay    = 1000,
     screenWidth     = screen.width,
     screenHeight    = screen.height,
     body            = document.body,
@@ -12,6 +12,7 @@ var MAX_BLOCK_COUNT = 10000,
     stopped         = false,
     counter         = 0,
     index           = 0,
+    startTime       = Date.now(),
     timerIdBlocks,
     timerIdOverlay;
 
@@ -116,23 +117,27 @@ document.addEventListener('keydown', function ( event ) {
             break;
         case 49:
             blinkBlocks(-STEP_DELAY);
-            console.log('blocks generating delay: ' + newBlockDelay);
+            console.log('Blocks generating delay: ' + newBlockDelay);
             break;
         case 50:
             blinkBlocks(STEP_DELAY);
-            console.log('blocks generating delay: ' + newBlockDelay);
+            console.log('Blocks generating delay: ' + newBlockDelay);
             break;
         case 51:
             blinkOverlay(-STEP_DELAY);
-            console.log('overlay appearing delay: ' + overlayDelay);
+            console.log('Overlay appearing delay: ' + overlayDelay);
             break;
         case 52:
             blinkOverlay(STEP_DELAY);
-            console.log('overlay appearing delay: ' + overlayDelay);
+            console.log('Overlay appearing delay: ' + overlayDelay);
             break;
         case 73: // get info on "i" button
-            console.log('\ngenerated blocks: ' + counter + '\nblocks generating delay: ' + newBlockDelay +
-                '\noverlay appearing delay: ' + overlayDelay);
+            console.log(
+                'Generated blocks: ' + counter +
+                '\nBlocks generating delay: ' + newBlockDelay +
+                '\nOverlay appearing delay: ' + overlayDelay +
+                '\nElapsed time: ' + Math.round((Date.now() - startTime) / 1000) + ' seconds'
+            );
             break;
     }
 });
