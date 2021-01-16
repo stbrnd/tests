@@ -117,26 +117,26 @@ document.addEventListener('keydown', function ( event ) {
             break;
         case 49:
             blinkBlocks(-STEP_DELAY);
-            console.log('Blocks generating delay: ' + newBlockDelay);
+            console.log('blocks generating delay: ' + newBlockDelay);
             break;
         case 50:
             blinkBlocks(STEP_DELAY);
-            console.log('Blocks generating delay: ' + newBlockDelay);
+            console.log('blocks generating delay: ' + newBlockDelay);
             break;
         case 51:
             blinkOverlay(-STEP_DELAY);
-            console.log('Overlay appearing delay: ' + overlayDelay);
+            console.log('overlay appearing delay: ' + overlayDelay);
             break;
         case 52:
             blinkOverlay(STEP_DELAY);
-            console.log('Overlay appearing delay: ' + overlayDelay);
+            console.log('overlay appearing delay: ' + overlayDelay);
             break;
         case 73: // get info on "i" button
             console.log(
-                'Generated blocks: ' + counter +
-                '\nBlocks generating delay: ' + newBlockDelay +
-                '\nOverlay appearing delay: ' + overlayDelay +
-                '\nElapsed time: ' + Math.round((Date.now() - startTime) / 1000) + ' seconds'
+                'generated blocks: ' + counter +
+                '\nblocks generating delay: ' + newBlockDelay +
+                '\noverlay appearing delay: ' + overlayDelay +
+                '\nelapsed time: ' + Math.round((Date.now() - startTime) / 1000) + ' seconds'
             );
             break;
     }
