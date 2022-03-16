@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Disable hardware buttons</title>
+    <style>
+        html, body {
+            color: #000;
+            background: #fff;
+        }
+
+        #info {
+            width: 500px;
+            height: 500px;
+            color: white;
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">APP/SET/VK/TV are disabled.</div>
+    <script>
+        gSTB.EnableAppButton(false);
+        gSTB.EnableServiceButton(false);
+        gSTB.EnableVKButton(false);
+        gSTB.EnableTvButton(false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Enable hardware buttons</title>
+    <style>
+        html, body {
+            color: #000;
+            background: #fff;
+        }
+
+        #info {
+            width: 500px;
+            height: 500px;
+            color: white;
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">APP/SET/VK/TV are enabled.</div>
+    <script>
+        gSTB.EnableAppButton(true);
+        gSTB.EnableServiceButton(true);
+        gSTB.EnableVKButton(true);
+        gSTB.EnableTvButton(true);
+    </script>
+</body>
+</html>
