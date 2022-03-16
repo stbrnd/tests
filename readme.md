@@ -1,6 +1,8 @@
 Test pages
 ==========
 
+[Checking hardware buttons](hardware.buttons)
+
 [Checking HTML5 History API](html5.historyapi.check)
 
 [Checking iframe security policy](iframe.security.check)
