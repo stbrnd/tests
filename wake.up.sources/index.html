@@ -29,6 +29,10 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
 #supportedSources{font-size:18px;white-space:pre-wrap;word-wrap:break-word}
 .box{flex-shrink:0}
 @media(max-width:800px){.layout,.left,.right{display:block;width:100%}.left{padding-right:0}}
+#riskPanel{border:3px solid #ffd34e;padding:16px;margin:12px 0;font-size:18px}
+#riskWarning{margin:0 0 12px;color:#ffd34e}
+.riskCheck{width:24px;height:24px;vertical-align:middle}
+.riskCheck.focused{outline:3px solid #55d6ff;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -43,7 +47,11 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     </div>
     <div class="right">
       <div id="sourcesPanel" class="panel" tabindex="0"><div><b>WakeUp Sources</b> <span id="modeLabel">[group]</span></div><div id="sources"></div></div>
-      <button id="apply" class="action">APPLY: gSTB.SetWakeUpSources(...)</button>
+      <div id="riskPanel" style="display:none">
+        <p id="riskWarning"></p>
+        <label><input id="riskAccepted" class="riskCheck" type="checkbox" aria-describedby="riskWarning"> I understand the risk and allow applying this selection</label>
+      </div>
+      <button id="apply" disabled class="action">APPLY: gSTB.SetWakeUpSources(...)</button>
       <button id="reload" class="action">Reload page</button>
       <button id="portal" class="action">Go to internal portal</button>
     </div>
@@ -66,7 +74,7 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
 
     var enabled = {};
     var canApply = false;
-    var outerIndex = 0; // 0=sources, 1=apply, 2=reload, 3=portal
+    var outerIndex = 0; // 0=sources, 1=confirmation, 2=apply, 3=reload, 4=portal
     var innerMode = false;
     var innerIndex = 0;
 
@@ -74,12 +82,40 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     var sourcesEl = document.getElementById("sources");
     var statusEl = document.getElementById("status");
     var modeLabel = document.getElementById("modeLabel");
+    var riskPanel = document.getElementById("riskPanel");
+    var riskAccepted = document.getElementById("riskAccepted");
+    var applyButton = document.getElementById("apply");
     var actions = [
         panel,
-        document.getElementById("apply"),
+        riskAccepted,
+        applyButton,
         document.getElementById("reload"),
         document.getElementById("portal")
     ];
+
+    function actionAvailable(index) {
+        return !actions[index].disabled && (index !== 1 || riskPanel.style.display !== "none");
+    }
+
+    function moveOuter(direction) {
+        do {
+            outerIndex = (outerIndex + direction + actions.length) % actions.length;
+        } while (!actionAvailable(outerIndex));
+    }
+
+    function updateApplyState() {
+        var risky = !enabled[1];
+        riskPanel.style.display = risky ? "block" : "none";
+        document.getElementById("riskWarning").textContent = selectedValues().length === 0 ?
+            "No wake-up sources are selected. The STB may not wake from standby without a power cycle." :
+            "IR (1) is not selected. The remote power button will not be an enabled wake-up source.";
+        riskAccepted.disabled = !canApply;
+        applyButton.disabled = !canApply || (risky && !riskAccepted.checked);
+        applyButton.setAttribute("aria-disabled", applyButton.disabled ? "true" : "false");
+        if (!actionAvailable(outerIndex)) {
+            outerIndex = risky && canApply ? 1 : 0;
+        }
+    }
 
     function validSources(value) {
         if (Object.prototype.toString.call(value) !== "[object Array]") return false;
@@ -151,9 +187,10 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     }
 
     function renderFocus() {
+        updateApplyState();
         var i;
         for (i=0; i<actions.length; i++) {
-            actions[i].className = (i === 0 ? "panel" : "action");
+            actions[i].className = (i === 0 ? "panel" : (i === 1 ? "riskCheck" : "action"));
             if (i === outerIndex) actions[i].className += " focused";
         }
         if (innerMode) panel.className = "panel inner";
@@ -166,7 +203,8 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
 
     function toggle(id) {
         enabled[id] = !enabled[id];
-        renderSources();
+        riskAccepted.checked = false;
+        renderFocus();
         status("Local selection changed: source " + id + " = " + (enabled[id] ? "ON" : "OFF"));
     }
 
@@ -178,6 +216,16 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
         return result;
     }
 
+    function sameSources(expected, actual) {
+        if (!validSources(actual) || expected.length !== actual.length) return false;
+        var left = expected.slice().sort(function(a, b) { return a - b; });
+        var right = actual.slice().sort(function(a, b) { return a - b; });
+        for (var i = 0; i < left.length; i++) {
+            if (left[i] !== right[i]) return false;
+        }
+        return true;
+    }
+
     function applyValues() {
         if (!canApply) {
             status("APPLY is unavailable until current sources are read successfully and SetWakeUpSources is available. Reload to retry.", "err");
@@ -187,11 +235,32 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
         try {
             if (typeof window.gSTB === "undefined") { status("gSTB is not available. Browser mode is active.", "warn"); return; }
             if (typeof window.gSTB.SetWakeUpSources !== "function") { status("gSTB.SetWakeUpSources is not available.", "err"); return; }
-            var result = window.gSTB.SetWakeUpSources(values);
-            status("SetWakeUpSources([" + values.join(", ") + "]) → " + result,
-                   result === false ? "err" : "ok");
+            if (typeof window.gSTB.GetWakeUpSources !== "function") { status("gSTB.GetWakeUpSources is not available. Cannot verify a write.", "err"); return; }
+            if (!enabled[1] && !riskAccepted.checked) {
+                status("Confirm the risk using the checkbox before applying this selection.", "warn");
+                return;
+            }
+            // Preserve the requested list even if the native binding mutates its argument.
+            var result = window.gSTB.SetWakeUpSources(values.slice());
+            if (result !== true) {
+                status("SetWakeUpSources([" + values.join(", ") + "]) did not return true. Write not confirmed.", "err");
+                return;
+            }
         } catch(e) {
             status("SetWakeUpSources error ([" + values.join(", ") + "]): " + e.message, "err");
+            return;
+        }
+
+        try {
+            var actual = window.gSTB.GetWakeUpSources();
+            if (!sameSources(values, actual)) {
+                var actualText = validSources(actual) ? "[" + actual.join(", ") + "]" : "an invalid source list";
+                status("Verification failed: requested [" + values.join(", ") + "], read back " + actualText + ".", "err");
+                return;
+            }
+            status("SetWakeUpSources([" + values.join(", ") + "]) → true. Verified with GetWakeUpSources().", "ok");
+        } catch(e) {
+            status("SetWakeUpSources returned true, but read-back verification failed: " + e.message, "err");
         }
     }
 
@@ -220,10 +289,15 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
             innerMode = true;
             renderFocus();
         } else if (outerIndex === 1) {
-            applyValues();
+            if (!riskAccepted.disabled) {
+                riskAccepted.checked = !riskAccepted.checked;
+                renderFocus();
+            }
         } else if (outerIndex === 2) {
-            location.reload();
+            applyValues();
         } else if (outerIndex === 3) {
+            location.reload();
+        } else if (outerIndex === 4) {
             goPortal();
         }
     }
@@ -239,13 +313,16 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
                 }
             };
             actions[index].onclick = function() {
+                if (!actionAvailable(index)) return;
                 outerIndex = index;
                 innerMode = false;
                 renderFocus();
-                activateOuter();
+                // Native checkbox clicks already toggle checked; do not toggle twice.
+                if (index !== 1) activateOuter();
             };
         })(actionIndex);
     }
+    riskAccepted.onchange = function() { renderFocus(); };
     sourcesEl.onclick = function(e) {
         e = e || window.event;
         var target = e.target || e.srcElement;
@@ -322,8 +399,8 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
             return false;
         }
 
-        if (k === 38) outerIndex = (outerIndex + actions.length - 1) % actions.length;
-        else if (k === 40) outerIndex = (outerIndex + 1) % actions.length;
+        if (k === 38) moveOuter(-1);
+        else if (k === 40) moveOuter(1);
         else if (k === 13) { activateOuter(); if (e.preventDefault) e.preventDefault(); return false; }
         else return true;
 
@@ -335,7 +412,9 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     function init() {
         var i;
         canApply = false;
-        actions[1].setAttribute("aria-disabled", "true");
+        riskAccepted.checked = false;
+        applyButton.disabled = true;
+        applyButton.setAttribute("aria-disabled", "true");
         showSupportedSources();
         for (i=0; i<SOURCES.length; i++) enabled[SOURCES[i].id] = false;
 
@@ -346,7 +425,7 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
             if (!validSources(current)) { status("GetWakeUpSources returned an invalid value: " + String(current), "err"); renderFocus(); return; }
             for (i=0; i<current.length; i++) enabled[Number(current[i])] = true;
             canApply = typeof window.gSTB.SetWakeUpSources === "function";
-            actions[1].setAttribute("aria-disabled", canApply ? "false" : "true");
+            updateApplyState();
             status("GetWakeUpSources() → [" + Array.prototype.join.call(current, ", ") + "]", "ok");
         } catch(e) {
             status("Initialization error: " + e.message + ". The UI remains available for navigation testing.", "err");
