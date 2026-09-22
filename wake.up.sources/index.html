@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MAG WakeUp Sources Test</title>
+<style>
+html,body{margin:0;padding:0;background:#10151d;color:#eee;font-family:Arial,sans-serif;font-size:24px}
+body{overflow:hidden}
+#app{width:1180px;margin:28px auto}
+.layout{display:table;width:100%;table-layout:fixed}.left,.right{display:table-cell;vertical-align:top;box-sizing:border-box}.left{width:42%;padding-right:22px}.right{width:58%}.info{border:4px solid #34404f;background:#18212c;padding:18px;margin-bottom:16px}.info h2{font-size:24px;margin:0 0 12px}.info p{font-size:17px;line-height:1.45;color:#c4ccd7}.statusTitle{font-size:22px;margin:0 0 8px}
+h1{font-size:34px;margin:0 0 12px}
+.hint{font-size:18px;color:#aab4c3;margin-bottom:20px}
+.panel{border:4px solid #34404f;background:#18212c;padding:18px;margin-bottom:18px}
+.panel.focused{border-color:#ffd34e;background:#202b38}
+.panel.inner{border-color:#55d6ff;background:#17313b}
+.item {
+    padding: 9px 12px;
+    margin: 3px 0;
+    border: 3px solid transparent;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+.item.selected{border-color:#55d6ff;background:#214957}
+.box{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;
+border:3px solid #8995a5;margin-right:14px;font-weight:bold}
+.checked .box{background:#39b86b;border-color:#7cffad;color:#07140b}
+.id{display:inline-block;padding: 0 12px;color:#ffd34e;font-weight:bold}
+.action{display:block;width:100%;box-sizing:border-box;padding:18px;border:4px solid #34404f;
+background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;margin:12px 0}
+.action.focused{border-color:#ffd34e;background:#39434f;color:#fff}
+#apply{font-size:31px;text-align:center;padding:24px}
+#status{min-height:30px;padding:12px 16px;background:#090d12;color:#bfe7ff;font-size:19px}
+.ok{color:#7cffad!important}.err{color:#ff8b8b!important}.warn{color:#ffd34e!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>MAG — WakeUp Sources Test</h1>
+  <div class="layout">
+    <div class="left">
+      <div class="info"><h2>About this test</h2><p>This page reads the current wake-up sources with <b>gSTB.GetWakeUpSources()</b> and applies the selected values with <b>gSTB.SetWakeUpSources()</b>.</p><p>It can also be opened in a regular browser to test the UI and keyboard navigation. STB API calls will report their availability in the status block.</p></div>
+      <div class="info"><h2>Navigation</h2><div class="hint">↑ / ↓ — move between controls<br>Enter — activate / enter source list<br>Back / Esc — leave source list<br>0–6 — toggle source by ID globally</div></div>
+      <h2 class="statusTitle">Status</h2><div id="status">Initializing…</div>
+    </div>
+    <div class="right">
+      <div id="sourcesPanel" class="panel"><div><b>WakeUp Sources</b> <span id="modeLabel">[group]</span></div><div id="sources"></div></div>
+      <button id="apply" class="action">APPLY: gSTB.SetWakeUpSources(...)</button>
+      <button id="reload" class="action">Reload page</button>
+      <button id="portal" class="action">Go to internal portal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+    var FALLBACK_PORTAL_URL = "file:///home/web/system/pages/index.html";
+
+    var SOURCES = [
+        {id:0, name:"Unknown"},
+        {id:1, name:"IR (power button from RCU)"},
+        {id:2, name:"HDMI_HPD (HDMI HotPlug Detect)"},
+        {id:3, name:"CEC (CEC command from TV)"},
+        {id:4, name:"WakeOnLAN"},
+        {id:5, name:"Button (button from rear panel)"},
+        {id:6, name:"Soft (software exit from standby via gSTB.StandBy for S1 mode)"}
+    ];
+
+    var enabled = {};
+    var outerIndex = 0; // 0=sources, 1=apply, 2=reload, 3=portal
+    var innerMode = false;
+    var innerIndex = 0;
+
+    var panel = document.getElementById("sourcesPanel");
+    var sourcesEl = document.getElementById("sources");
+    var statusEl = document.getElementById("status");
+    var modeLabel = document.getElementById("modeLabel");
+    var actions = [
+        panel,
+        document.getElementById("apply"),
+        document.getElementById("reload"),
+        document.getElementById("portal")
+    ];
+
+    function status(text, type) {
+        statusEl.className = type || "";
+        statusEl.innerHTML = text;
+    }
+
+    window.onerror = function(message, source, lineno, colno, error) {
+        var details = "Global error: " + message;
+        if (source) details += "<br>Source: " + source;
+        if (lineno) details += "<br>Line: " + lineno + (colno ? ", column: " + colno : "");
+        if (error && error.stack) details += "<br>" + String(error.stack).replace(/\n/g, "<br>");
+        status(details, "err");
+        return false;
+    };
+
+    function renderSources() {
+        var html = "";
+        var i, s, cls;
+        for (i=0; i<SOURCES.length; i++) {
+            s = SOURCES[i];
+            cls = "item" + (enabled[s.id] ? " checked" : "");
+            if (innerMode && innerIndex === i) cls += " selected";
+            html += '<div class="' + cls + '"><span class="box">' +
+                    (enabled[s.id] ? "X" : "") + '</span><span class="id">' +
+                    s.id + '</span>' + s.name + '</div>';
+        }
+        sourcesEl.innerHTML = html;
+    }
+
+    function renderFocus() {
+        var i;
+        for (i=0; i<actions.length; i++) {
+            actions[i].className = (i === 0 ? "panel" : "action");
+            if (i === outerIndex) actions[i].className += " focused";
+        }
+        if (innerMode) panel.className = "panel inner";
+        modeLabel.innerHTML = innerMode ? "[source navigation]" : "[group]";
+        renderSources();
+    }
+
+    function toggle(id) {
+        enabled[id] = !enabled[id];
+        renderSources();
+        status("Local selection changed: source " + id + " = " + (enabled[id] ? "ON" : "OFF"));
+    }
+
+    function selectedValues() {
+        var result = [], i;
+        for (i=0; i<SOURCES.length; i++) {
+            if (enabled[SOURCES[i].id]) result.push(SOURCES[i].id);
+        }
+        return result;
+    }
+
+    function applyValues() {
+        var values = selectedValues();
+        try {
+            if (typeof window.gSTB === "undefined") { status("gSTB is not available. Browser mode is active.", "warn"); return; }
+            if (typeof window.gSTB.SetWakeUpSources !== "function") { status("gSTB.SetWakeUpSources is not available.", "err"); return; }
+            var result = window.gSTB.SetWakeUpSources(values);
+            status("SetWakeUpSources([" + values.join(", ") + "]) → " + result,
+                   result === false ? "err" : "ok");
+        } catch(e) {
+            status("SetWakeUpSources error ([" + values.join(", ") + "]): " + e.message, "err");
+        }
+    }
+
+    function getQueryParam(name) {
+        var q = location.search.substring(1).split("&"), i, p;
+        for (i=0; i<q.length; i++) {
+            p = q[i].split("=");
+            if (decodeURIComponent(p[0]) === name) {
+                return decodeURIComponent((p.slice(1).join("=") || "").replace(/\+/g, " "));
+            }
+        }
+        return "";
+    }
+
+    function goPortal() {
+        var url = getQueryParam("referrer") || FALLBACK_PORTAL_URL;
+        if (!url || url === "http://CHANGE-ME/") {
+            status("No ?referrer=... parameter and FALLBACK_PORTAL_URL is not configured.", "err");
+            return;
+        }
+        location.href = url;
+    }
+
+    function activateOuter() {
+        if (outerIndex === 0) {
+            innerMode = true;
+            renderFocus();
+        } else if (outerIndex === 1) {
+            applyValues();
+        } else if (outerIndex === 2) {
+            location.reload();
+        } else if (outerIndex === 3) {
+            goPortal();
+        }
+    }
+
+    function keyCode(e) {
+        e = e || window.event;
+
+        if (window.gSTB === undefined) {
+            return e.keyCode || e.which;
+        }
+
+        return e.code || e.keyCode || e.which;
+    }
+
+    function normalizeKey(k) {
+        if (typeof k !== "string") return k;
+        if (k === "ArrowUp") return 38;
+        if (k === "ArrowDown") return 40;
+        if (k === "Enter") return 13;
+        if (k === "Escape" || k === "Esc") return 27;
+        if (k === "Backspace" || k === "Back") return 8;
+        if (k.indexOf("Digit") === 0) return 48 + parseInt(k.substring(5), 10);
+        if (k.indexOf("Numpad") === 0) return 96 + parseInt(k.substring(6), 10);
+        return k;
+    }
+
+    document.onkeydown = function(e) {
+        e = e || window.event;
+        var k = normalizeKey(keyCode(e));
+
+        // 0..6 works global
+        if (k >= 48 && k <= 54) {
+            toggle(k - 48);
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+        if (k >= 96 && k <= 102) {
+            toggle(k - 96);
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+
+        // specials for back key
+        if (innerMode && (k === 27 || k === 8 || k === 461 || k === 10009)) {
+            innerMode = false;
+            renderFocus();
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+
+        if (innerMode) {
+            if (k === 38) innerIndex = (innerIndex + SOURCES.length - 1) % SOURCES.length;
+            else if (k === 40) innerIndex = (innerIndex + 1) % SOURCES.length;
+            else if (k === 13) toggle(SOURCES[innerIndex].id);
+            else return true;
+            renderFocus();
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+
+        if (k === 38) outerIndex = (outerIndex + actions.length - 1) % actions.length;
+        else if (k === 40) outerIndex = (outerIndex + 1) % actions.length;
+        else if (k === 13) { activateOuter(); if (e.preventDefault) e.preventDefault(); return false; }
+        else return true;
+
+        renderFocus();
+        if (e.preventDefault) e.preventDefault();
+        return false;
+    };
+
+    function init() {
+        var i;
+        for (i=0; i<SOURCES.length; i++) enabled[SOURCES[i].id] = false;
+
+        try {
+            if (typeof window.gSTB === "undefined") { status("gSTB is not available. Browser mode: UI and keyboard navigation can still be tested.", "warn"); renderFocus(); return; }
+            if (typeof window.gSTB.GetWakeUpSources !== "function") { status("gSTB.GetWakeUpSources is not available.", "err"); renderFocus(); return; }
+            var current = window.gSTB.GetWakeUpSources();
+            if (!current || typeof current.length === "undefined") { status("GetWakeUpSources returned an invalid value: " + String(current), "err"); renderFocus(); return; }
+            for (i=0; i<current.length; i++) enabled[Number(current[i])] = true;
+            status("GetWakeUpSources() → [" + Array.prototype.join.call(current, ", ") + "]", "ok");
+        } catch(e) {
+            status("Initialization error: " + e.message + ". The UI remains available for navigation testing.", "err");
+        }
+        renderFocus();
+    }
+
+    init();
+})();
+</script>
+</body>
+</html>
