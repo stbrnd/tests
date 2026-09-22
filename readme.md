@@ -1,6 +1,8 @@
 Test pages
 ==========
 
+[Checking fonts. Get parameters "font" and "size" to change font-family and font-size](font)
+
 [Checking hardware buttons](hardware.buttons)
 
 [Checking HTML5 History API](html5.historyapi.check)
@@ -11,7 +13,7 @@ Test pages
 
 [Testing of repaint](repaint.on.focus)
 
-[Checking fonts. Get parameters "font" and "size" to change font-family and font-size](font)
+[Checking correctness of using stb wake up sources.](wake.up.sources)
 
 [Append weinre script on the target and display information about for STB](weinre.info.page)
 
