@@ -5,22 +5,15 @@
 <title>MAG WakeUp Sources Test</title>
 <style>
 html,body{margin:0;padding:0;background:#10151d;color:#eee;font-family:Arial,sans-serif;font-size:24px}
-body{overflow:hidden}
-#app{width:1180px;margin:28px auto}
+body{overflow:auto}
+#app{width:1180px;max-width:94%;margin:28px auto}
 .layout{display:table;width:100%;table-layout:fixed}.left,.right{display:table-cell;vertical-align:top;box-sizing:border-box}.left{width:42%;padding-right:22px}.right{width:58%}.info{border:4px solid #34404f;background:#18212c;padding:18px;margin-bottom:16px}.info h2{font-size:24px;margin:0 0 12px}.info p{font-size:17px;line-height:1.45;color:#c4ccd7}.statusTitle{font-size:22px;margin:0 0 8px}
 h1{font-size:34px;margin:0 0 12px}
 .hint{font-size:18px;color:#aab4c3;margin-bottom:20px}
 .panel{border:4px solid #34404f;background:#18212c;padding:18px;margin-bottom:18px}
 .panel.focused{border-color:#ffd34e;background:#202b38}
 .panel.inner{border-color:#55d6ff;background:#17313b}
-.item {
-    padding: 9px 12px;
-    margin: 3px 0;
-    border: 3px solid transparent;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-}
+.item{padding:9px 12px;margin:3px 0;border:3px solid transparent;font-size:18px;display:flex;align-items:center}
 .item.selected{border-color:#55d6ff;background:#214957}
 .box{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;
 border:3px solid #8995a5;margin-right:14px;font-weight:bold}
@@ -32,6 +25,10 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
 #apply{font-size:31px;text-align:center;padding:24px}
 #status{min-height:30px;padding:12px 16px;background:#090d12;color:#bfe7ff;font-size:19px}
 .ok{color:#7cffad!important}.err{color:#ff8b8b!important}.warn{color:#ffd34e!important}
+.action[aria-disabled="true"]{opacity:0.5}
+#supportedSources{font-size:18px;white-space:pre-wrap;word-wrap:break-word}
+.box{flex-shrink:0}
+@media(max-width:800px){.layout,.left,.right{display:block;width:100%}.left{padding-right:0}}
 </style>
 </head>
 <body>
@@ -41,10 +38,11 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     <div class="left">
       <div class="info"><h2>About this test</h2><p>This page reads the current wake-up sources with <b>gSTB.GetWakeUpSources()</b> and applies the selected values with <b>gSTB.SetWakeUpSources()</b>.</p><p>It can also be opened in a regular browser to test the UI and keyboard navigation. STB API calls will report their availability in the status block.</p></div>
       <div class="info"><h2>Navigation</h2><div class="hint">↑ / ↓ — move between controls<br>Enter — activate / enter source list<br>Back / Esc — leave source list<br>0–6 — toggle source by ID globally</div></div>
+      <div class="info"><h2>SupportedWakeUpSources</h2><div id="supportedSources">Loading…</div></div>
       <h2 class="statusTitle">Status</h2><div id="status">Initializing…</div>
     </div>
     <div class="right">
-      <div id="sourcesPanel" class="panel"><div><b>WakeUp Sources</b> <span id="modeLabel">[group]</span></div><div id="sources"></div></div>
+      <div id="sourcesPanel" class="panel" tabindex="0"><div><b>WakeUp Sources</b> <span id="modeLabel">[group]</span></div><div id="sources"></div></div>
       <button id="apply" class="action">APPLY: gSTB.SetWakeUpSources(...)</button>
       <button id="reload" class="action">Reload page</button>
       <button id="portal" class="action">Go to internal portal</button>
@@ -67,6 +65,7 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     ];
 
     var enabled = {};
+    var canApply = false;
     var outerIndex = 0; // 0=sources, 1=apply, 2=reload, 3=portal
     var innerMode = false;
     var innerIndex = 0;
@@ -81,6 +80,47 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
         document.getElementById("reload"),
         document.getElementById("portal")
     ];
+
+    function validSources(value) {
+        if (Object.prototype.toString.call(value) !== "[object Array]") return false;
+        for (var i = 0; i < value.length; i++) {
+            if (typeof value[i] !== "number" || value[i] % 1 !== 0 ||
+                    value[i] < 0 || value[i] >= SOURCES.length) return false;
+        }
+        return true;
+    }
+
+    function showSupportedSources() {
+        var el = document.getElementById("supportedSources");
+        try {
+            if (typeof window.gSTB === "undefined") {
+                el.textContent = "gSTB is not available (browser mode).";
+                return;
+            }
+            var supported = window.gSTB.SupportedWakeUpSources;
+            if (typeof supported === "undefined") {
+                el.textContent = "SupportedWakeUpSources is not available.";
+            } else if (Object.prototype.toString.call(supported) !== "[object Array]") {
+                el.textContent = "Invalid value: " + String(supported);
+            } else {
+                var lines = ["[" + supported.join(", ") + "]"];
+                for (var i = 0; i < supported.length; i++) {
+                    var id = supported[i];
+                    lines.push(id + " — " + (typeof id === "number" && SOURCES[id] ? SOURCES[id].name : "Unknown source"));
+                }
+                el.textContent = lines.join("\n");
+            }
+        } catch (e) {
+            el.textContent = "SupportedWakeUpSources error: " + e.message;
+        }
+    }
+
+    function ensureVisible(el) {
+        var rect = el.getBoundingClientRect();
+        var height = window.innerHeight || document.documentElement.clientHeight;
+        if (rect.top < 0) el.scrollIntoView(true);
+        else if (rect.bottom > height) el.scrollIntoView(false);
+    }
 
     function status(text, type) {
         statusEl.className = type || "";
@@ -119,6 +159,9 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
         if (innerMode) panel.className = "panel inner";
         modeLabel.innerHTML = innerMode ? "[source navigation]" : "[group]";
         renderSources();
+        if (document.activeElement !== actions[outerIndex]) actions[outerIndex].focus();
+        var selected = sourcesEl.querySelector(".selected");
+        ensureVisible(innerMode && selected ? selected : actions[outerIndex]);
     }
 
     function toggle(id) {
@@ -136,6 +179,10 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
     }
 
     function applyValues() {
+        if (!canApply) {
+            status("APPLY is unavailable until current sources are read successfully and SetWakeUpSources is available. Reload to retry.", "err");
+            return;
+        }
         var values = selectedValues();
         try {
             if (typeof window.gSTB === "undefined") { status("gSTB is not available. Browser mode is active.", "warn"); return; }
@@ -180,6 +227,44 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
             goPortal();
         }
     }
+
+    // Keep native Tab/mouse focus and remote-control navigation in sync.
+    for (var actionIndex = 0; actionIndex < actions.length; actionIndex++) {
+        (function(index) {
+            actions[index].onfocus = function() {
+                if (outerIndex !== index || (index !== 0 && innerMode)) {
+                    outerIndex = index;
+                    innerMode = false;
+                    renderFocus();
+                }
+            };
+            actions[index].onclick = function() {
+                outerIndex = index;
+                innerMode = false;
+                renderFocus();
+                activateOuter();
+            };
+        })(actionIndex);
+    }
+    sourcesEl.onclick = function(e) {
+        e = e || window.event;
+        var target = e.target || e.srcElement;
+        while (target && target.parentNode !== sourcesEl) target = target.parentNode;
+        if (!target) return;
+        var items = sourcesEl.children;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i] === target) {
+                outerIndex = 0;
+                innerMode = true;
+                innerIndex = i;
+                toggle(SOURCES[i].id);
+                renderFocus();
+                break;
+            }
+        }
+        if (e.stopPropagation) e.stopPropagation();
+        e.cancelBubble = true;
+    };
 
     function keyCode(e) {
         e = e || window.event;
@@ -249,14 +334,19 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
 
     function init() {
         var i;
+        canApply = false;
+        actions[1].setAttribute("aria-disabled", "true");
+        showSupportedSources();
         for (i=0; i<SOURCES.length; i++) enabled[SOURCES[i].id] = false;
 
         try {
             if (typeof window.gSTB === "undefined") { status("gSTB is not available. Browser mode: UI and keyboard navigation can still be tested.", "warn"); renderFocus(); return; }
             if (typeof window.gSTB.GetWakeUpSources !== "function") { status("gSTB.GetWakeUpSources is not available.", "err"); renderFocus(); return; }
             var current = window.gSTB.GetWakeUpSources();
-            if (!current || typeof current.length === "undefined") { status("GetWakeUpSources returned an invalid value: " + String(current), "err"); renderFocus(); return; }
+            if (!validSources(current)) { status("GetWakeUpSources returned an invalid value: " + String(current), "err"); renderFocus(); return; }
             for (i=0; i<current.length; i++) enabled[Number(current[i])] = true;
+            canApply = typeof window.gSTB.SetWakeUpSources === "function";
+            actions[1].setAttribute("aria-disabled", canApply ? "false" : "true");
             status("GetWakeUpSources() → [" + Array.prototype.join.call(current, ", ") + "]", "ok");
         } catch(e) {
             status("Initialization error: " + e.message + ". The UI remains available for navigation testing.", "err");
