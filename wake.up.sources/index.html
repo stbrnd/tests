@@ -58,8 +58,11 @@ background:#1b2633;color:#fff;font-size:25px;font-weight:bold;text-align:left;ma
   </div>
 </div>
 
+
+<script type="text/javascript" src="../shared/PowerButtonHandler.js"></script>
 <script>
 (function () {
+    var powerButtonHandler = PowerButtonHandler.attach();
     var FALLBACK_PORTAL_URL = "file:///home/web/system/pages/index.html";
 
     var SOURCES = [
